@@ -1,3 +1,7 @@
+![caption](https://github.com/mjaroszewski1979/postman_book_store/blob/main/postman_image.jpg)
+
+---
+
 # Overview
 
 This repository contains a Postman collection designed to execute tests for the API created as part of this project - [Simple Books API](https://github.com/vdespa/introduction-to-postman-course/blob/main/simple-books-api.md).
@@ -31,5 +35,5 @@ Click the button below to directly fork the collection into your Postman workspa
 For questions or feedback, please contact [mjaroszewski1979.](https://github.com/mjaroszewski1979)
 
 
-![caption](https://github.com/mjaroszewski1979/postman_book_store/blob/main/postman_image.jpg)
+
 
