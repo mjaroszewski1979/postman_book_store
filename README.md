@@ -1,6 +1,5 @@
 ![caption](https://github.com/mjaroszewski1979/postman_book_store/blob/main/postman_image.jpg)
 
----
 
 # Overview
 
