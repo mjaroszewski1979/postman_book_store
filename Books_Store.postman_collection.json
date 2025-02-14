@@ -1,0 +1,1229 @@
+{
+	"info": {
+		"_postman_id": "f3d86ee5-43bd-46d5-93aa-79aaf6eec8a6",
+		"name": "Books_Store",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "41712630"
+	},
+	"item": [
+		{
+			"name": "Status",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Ensure response has the expected status\r",
+							"if (pm.response.code === 200) {\r",
+							"    pm.collectionVariables.set(\"status\", \"up\");\r",
+							"} else {\r",
+							"    pm.collectionVariables.set(\"status\", \"down\");\r",
+							"    console.log(\"API is down. Skipping further tests.\");\r",
+							"}\r",
+							"\r",
+							"// Test to verify that the response status code is 200 (OK)\r",
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"// Test to ensure the response time is within acceptable limits (less than 1000ms)\r",
+							"pm.test(\"Response time is less than 1000ms\", function () {\r",
+							"    pm.expect(pm.response.responseTime).to.be.below(1000);\r",
+							"});\r",
+							"\r",
+							"// Test to check if the response body contains a specific JSON string\r",
+							"pm.test(\"Body matches string\", function () {\r",
+							"    pm.expect(pm.response.text()).to.include(\"{\\\"status\\\":\\\"OK\\\"}\");\r",
+							"});\r",
+							"\r",
+							"// Test to confirm that the response type is a string\r",
+							"pm.test(\"Response type is a string\", function () {\r",
+							"    pm.expect(pm.response.text()).to.be.a(\"string\");\r",
+							"});\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": "{{main_url}}/status"
+			},
+			"response": []
+		},
+		{
+			"name": "BooksAll",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Pobranie odpowiedzi jako obiektu JSON\r",
+							"let response = pm.response.json();\r",
+							"\r",
+							"// Extract the IDs of the available books for further processing\r",
+							"let availableBooks = response.filter(book => book.available === true);\r",
+							"\r",
+							"// Extract the IDs of the available books for further processing\r",
+							"let availableBookIds = availableBooks.map(book => book.id);\r",
+							"\r",
+							"// Check if there are any available books before proceeding\r",
+							"if (availableBookIds.length > 0) {\r",
+							"    // Select a random book ID from the available books\r",
+							"    let randomBookId = availableBookIds[Math.floor(Math.random() * availableBookIds.length)];\r",
+							"\r",
+							"    // Store the selected book ID in a collection variable for later use\r",
+							"    pm.collectionVariables.set(\"bookId\", randomBookId);\r",
+							"\r",
+							"    console.log(\"Random book id:\", randomBookId);\r",
+							"} else {\r",
+							"    // Warn if no available books are found, preventing potential errors in dependent tests\r",
+							"    console.warn(\"No available books.\");\r",
+							"}\r",
+							"\r",
+							"// Test to verify that the response status code is 200 (OK)\r",
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"// Test to ensure the response time is within acceptable limits (less than 1000ms)\r",
+							"pm.test(\"Response time is less than 1000ms\", function () {\r",
+							"    pm.expect(pm.response.responseTime).to.be.below(1000);\r",
+							"});\r",
+							"\r",
+							"// Test to confirm that the response type is an array\r",
+							"pm.test(\"Response type is an array\", function () {\r",
+							"    pm.expect(pm.response.json()).to.be.a(\"array\");\r",
+							"});\r",
+							"\r",
+							"// Test to confirm that the array length is 6\r",
+							"pm.test(\"Response array length is 6\", function () {\r",
+							"    pm.expect(pm.response.json().length).to.eql(6);\r",
+							"});\r",
+							"\r",
+							"// Test to verify that each object in the response contains required keys\r",
+							"pm.test(\"Each object contains required keys\", function () {\r",
+							"    let jsonData = pm.response.json();\r",
+							"    jsonData.forEach(item => {\r",
+							"        pm.expect(item).to.have.property(\"id\");\r",
+							"        pm.expect(item).to.have.property(\"name\");\r",
+							"        pm.expect(item).to.have.property(\"type\");\r",
+							"        pm.expect(item).to.have.property(\"available\");\r",
+							"    });\r",
+							"});\r",
+							"\r",
+							"\r",
+							"// Test to ensure all IDs are unique and numeric\r",
+							"pm.test(\"IDs are unique and numbers\", function () {\r",
+							"    let jsonData = pm.response.json();\r",
+							"    let ids = jsonData.map(item => item.id);\r",
+							"    \r",
+							"    pm.expect(ids).to.have.length(new Set(ids).size); // Ensures uniqueness\r",
+							"    ids.forEach(id => pm.expect(id).to.be.a(\"number\")); // Ensures numeric type\r",
+							"});\r",
+							"\r",
+							"// Test to check that each 'name' field is a non-empty string\r",
+							"pm.test(\"Each name is a non-empty string\", function () {\r",
+							"    let jsonData = pm.response.json();\r",
+							"    jsonData.forEach(item => {\r",
+							"        pm.expect(item.name).to.be.a(\"string\");\r",
+							"        pm.expect(item.name).to.have.length.above(0);\r",
+							"    });\r",
+							"});\r",
+							"\r",
+							"// Test to validate that 'type' is either 'fiction' or 'non-fiction'\r",
+							"pm.test(\"Each type is either 'fiction' or 'non-fiction'\", function () {\r",
+							"    let jsonData = pm.response.json();\r",
+							"    let allowedTypes = [\"fiction\", \"non-fiction\"];\r",
+							"    \r",
+							"    jsonData.forEach(item => {\r",
+							"        pm.expect(allowedTypes).to.include(item.type);\r",
+							"    });\r",
+							"});\r",
+							"\r",
+							"// Test to verify that 'available' field is of boolean type\r",
+							"pm.test(\"Each 'available' field is boolean\", function () {\r",
+							"    let jsonData = pm.response.json();\r",
+							"    jsonData.forEach(item => {\r",
+							"        pm.expect(item.available).to.be.a(\"boolean\");\r",
+							"    });\r",
+							"});\r",
+							"\r",
+							"// Test to check if IDs are sorted in ascending order\r",
+							"pm.test(\"IDs are sorted in ascending order\", function () {\r",
+							"    let jsonData = pm.response.json();\r",
+							"    let ids = jsonData.map(item => item.id);\r",
+							"    let sortedIds = [...ids].sort((a, b) => a - b);\r",
+							"\r",
+							"    pm.expect(ids).to.eql(sortedIds);\r",
+							"});\r",
+							"\r",
+							"// Test to ensure at least one book is available in the response\r",
+							"pm.test(\"At least one book is available\", function () {\r",
+							"    let jsonData = pm.response.json();\r",
+							"    let availableBooks = jsonData.filter(item => item.available === true);\r",
+							"    \r",
+							"    pm.expect(availableBooks.length).to.be.at.least(1);\r",
+							"});\r",
+							"\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"// Retrieve the API status variable\r",
+							"const statusApi = pm.environment.get(\"status\");\r",
+							"\r",
+							"if (statusApi === \"down\") {\r",
+							"    console.warn(\"Skipping test execution because API is down.\");\r",
+							"    pm.execution.setNextRequest(null); // Stops the collection run\r",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{main_url}}/books",
+					"host": [
+						"{{main_url}}"
+					],
+					"path": [
+						"books"
+					],
+					"query": [
+						{
+							"key": "type",
+							"value": "fiction",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "BooksFiction",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Test to verify that the response status code is 200 (OK)\r",
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"// Test to ensure the response time is within acceptable limits (less than 1000ms)\r",
+							"pm.test(\"Response time is less than 1000ms\", function () {\r",
+							"    pm.expect(pm.response.responseTime).to.be.below(1000);\r",
+							"});\r",
+							"\r",
+							"// Test to confirm that the response type is an array\r",
+							"pm.test(\"Response type is an array\", function () {\r",
+							"    pm.expect(pm.response.json()).to.be.a(\"array\");\r",
+							"});\r",
+							"\r",
+							"// Test to confirm that the array length is 4\r",
+							"pm.test(\"Response array length is 4\", function () {\r",
+							"    pm.expect(pm.response.json().length).to.eql(4);\r",
+							"});\r",
+							"\r",
+							"// Test to verify that each object in the response contains required keys\r",
+							"pm.test(\"Each object contains required keys\", function () {\r",
+							"    let jsonData = pm.response.json();\r",
+							"    jsonData.forEach(item => {\r",
+							"        pm.expect(item).to.have.property(\"id\");\r",
+							"        pm.expect(item).to.have.property(\"name\");\r",
+							"        pm.expect(item).to.have.property(\"type\");\r",
+							"        pm.expect(item).to.have.property(\"available\");\r",
+							"    });\r",
+							"});\r",
+							"\r",
+							"\r",
+							"// Test to validate that 'type' is 'fiction' \r",
+							"pm.test(\"Each type is 'fiction'\", function () {\r",
+							"    let jsonData = pm.response.json();\r",
+							"    let allowedType = \"fiction\";\r",
+							"    \r",
+							"    jsonData.forEach(item => {\r",
+							"        pm.expect(allowedType).to.include(item.type);\r",
+							"    });\r",
+							"});\r",
+							"\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"// Retrieve the API status variable\r",
+							"const statusApi = pm.environment.get(\"status\");\r",
+							"\r",
+							"if (statusApi === \"down\") {\r",
+							"    console.warn(\"Skipping test execution because API is down.\");\r",
+							"    pm.execution.setNextRequest(null); // Stops the collection run\r",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{main_url}}/books?type=fiction",
+					"host": [
+						"{{main_url}}"
+					],
+					"path": [
+						"books"
+					],
+					"query": [
+						{
+							"key": "type",
+							"value": "fiction"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "BooksLimit",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Test to verify that the response status code is 200 (OK)\r",
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"// Test to ensure the response time is within acceptable limits (less than 1000ms)\r",
+							"pm.test(\"Response time is less than 1000ms\", function () {\r",
+							"    pm.expect(pm.response.responseTime).to.be.below(1000);\r",
+							"});\r",
+							"\r",
+							"// Test to confirm that the response type is an array\r",
+							"pm.test(\"Response type is an array\", function () {\r",
+							"    pm.expect(pm.response.json()).to.be.a(\"array\");\r",
+							"});\r",
+							"\r",
+							"// Test to confirm that the array length is 2\r",
+							"pm.test(\"Response array length is 2\", function () {\r",
+							"    pm.expect(pm.response.json().length).to.eql(2);\r",
+							"});\r",
+							"\r",
+							"// Test to verify that each object in the response contains required keys\r",
+							"pm.test(\"Each object contains required keys\", function () {\r",
+							"    let jsonData = pm.response.json();\r",
+							"    jsonData.forEach(item => {\r",
+							"        pm.expect(item).to.have.property(\"id\");\r",
+							"        pm.expect(item).to.have.property(\"name\");\r",
+							"        pm.expect(item).to.have.property(\"type\");\r",
+							"        pm.expect(item).to.have.property(\"available\");\r",
+							"    });\r",
+							"});\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"// Retrieve the API status variable\r",
+							"const statusApi = pm.environment.get(\"status\");\r",
+							"\r",
+							"if (statusApi === \"down\") {\r",
+							"    console.warn(\"Skipping test execution because API is down.\");\r",
+							"    pm.execution.setNextRequest(null); // Stops the collection run\r",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{main_url}}/books?limit=2",
+					"host": [
+						"{{main_url}}"
+					],
+					"path": [
+						"books"
+					],
+					"query": [
+						{
+							"key": "limit",
+							"value": "2"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "BookSingle",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Test to verify that the response status code is 200 (OK)\r",
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"// Test to ensure the response time is within acceptable limits (less than 1000ms)\r",
+							"pm.test(\"Response time is less than 1000ms\", function () {\r",
+							"    pm.expect(pm.response.responseTime).to.be.below(1000);\r",
+							"});\r",
+							"\r",
+							"// Test to confirm that the response type is an object\r",
+							"pm.test(\"Response type is an object\", function () {\r",
+							"    pm.expect(pm.response.json()).to.be.a(\"object\");\r",
+							"});\r",
+							"\r",
+							"// Test to verify that returned object in the response contains required keys\r",
+							"pm.test(\"Each object contains required keys\", function () {\r",
+							"    let jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData).to.have.property(\"id\");\r",
+							"    pm.expect(jsonData).to.have.property(\"name\");\r",
+							"    pm.expect(jsonData).to.have.property(\"type\");\r",
+							"    pm.expect(jsonData).to.have.property(\"available\");\r",
+							"});\r",
+							"\r",
+							"// Test to ensure that ID is numeric\r",
+							"pm.test(\"ID is a number\", function () {\r",
+							"    let jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.id).to.be.a(\"number\"); \r",
+							"});\r",
+							"\r",
+							"// Test to check that 'name' field is a non-empty string\r",
+							"pm.test(\"Name is a non-empty string\", function () {\r",
+							"    let jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.name).to.be.a(\"string\");\r",
+							"    pm.expect(jsonData.name).to.have.length.above(0);\r",
+							"});\r",
+							"\r",
+							"// Test to verify that 'available' field is of boolean type\r",
+							"pm.test(\"'Available' field is boolean\", function () {\r",
+							"    let jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.available).to.be.a(\"boolean\");\r",
+							"});\r",
+							"\r",
+							"// Test to validate that if 'current-stock' is 0, then 'available' must be false\r",
+							"pm.test(\"If 'current-stock' is 0, then 'available' should be false\", function () {\r",
+							"    let jsonData = pm.response.json();\r",
+							"    if (jsonData[\"current-stock\"] === 0) {\r",
+							"        pm.expect(jsonData.available).to.be.false;\r",
+							"    }\r",
+							"});\r",
+							"\r",
+							"// Test to validate the response JSON schema\r",
+							"pm.test(\"Response matches the expected JSON schema\", function () {\r",
+							"    let schema = {\r",
+							"        \"type\": \"object\",\r",
+							"        \"required\": [\"id\", \"name\", \"author\", \"type\", \"price\", \"current-stock\", \"available\"],\r",
+							"        \"properties\": {\r",
+							"            \"id\": {\"type\": \"number\"},\r",
+							"            \"name\": {\"type\": \"string\"},\r",
+							"            \"author\": {\"type\": \"string\"},\r",
+							"            \"type\": {\"type\": \"string\"},\r",
+							"            \"price\": {\"type\": \"number\"},\r",
+							"            \"current-stock\": {\"type\": \"number\"},\r",
+							"            \"available\": {\"type\": \"boolean\"}\r",
+							"        }\r",
+							"    };\r",
+							"\r",
+							"    pm.response.to.have.jsonSchema(schema);\r",
+							"});\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"// Retrieve the API status variable\r",
+							"const statusApi = pm.environment.get(\"status\");\r",
+							"\r",
+							"if (statusApi === \"down\") {\r",
+							"    console.warn(\"Skipping test execution because API is down.\");\r",
+							"    pm.execution.setNextRequest(null); // Stops the collection run\r",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{main_url}}/books/:bookId",
+					"host": [
+						"{{main_url}}"
+					],
+					"path": [
+						"books",
+						":bookId"
+					],
+					"query": [
+						{
+							"key": "limit",
+							"value": "4",
+							"disabled": true
+						}
+					],
+					"variable": [
+						{
+							"key": "bookId",
+							"value": "2"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Auth",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Parse request body and store 'clientName' in collection variables if present\r",
+							"if (pm.request.body && pm.request.body.raw) {\r",
+							"    try {\r",
+							"        const reqJson = JSON.parse(pm.request.body.raw);\r",
+							"        pm.collectionVariables.set(\"customerName\", reqJson.clientName || \"\");\r",
+							"    } catch (error) {\r",
+							"        console.error(\"Błąd parsowania ciała żądania:\", error);\r",
+							"    }\r",
+							"}\r",
+							"\r",
+							"// Extract 'accessToken' from response and store it in collection variables\r",
+							"try {\r",
+							"    const jsonData = pm.response.json();\r",
+							"    if (jsonData.accessToken) {\r",
+							"        pm.collectionVariables.set(\"accessToken\", jsonData.accessToken);\r",
+							"    } else {\r",
+							"        console.warn(\"Brak accessToken w odpowiedzi.\");\r",
+							"    }\r",
+							"} catch (error) {\r",
+							"    console.error(\"Błąd parsowania odpowiedzi JSON:\", error);\r",
+							"}\r",
+							"  \r",
+							"// Test to verify that the response status code is 201\r",
+							"pm.test(\"Status code is 201\", function () {\r",
+							"    pm.response.to.have.status(201);\r",
+							"});\r",
+							"\r",
+							"// Test to ensure the response time is within acceptable limits (less than 1000ms)\r",
+							"pm.test(\"Response time is less than 1000ms\", function () {\r",
+							"    pm.expect(pm.response.responseTime).to.be.below(1000);\r",
+							"});\r",
+							"\r",
+							"// Test to confirm that the response type is a string\r",
+							"pm.test(\"Response type is an object\", function () {\r",
+							"    pm.expect(pm.response.json()).to.be.a(\"object\");\r",
+							"});\r",
+							"\r",
+							"// Test to verify that returned object in the response contains required keys\r",
+							"pm.test(\"Returned object contains required key\", function () {\r",
+							"    let jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData).to.have.property(\"accessToken\");\r",
+							"});\r",
+							"\r",
+							"// Test to check that 'accessToken' field is a non-empty string\r",
+							"pm.test(\"accessToken is a non-empty string\", function () {\r",
+							"    let jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.accessToken).to.be.a(\"string\");\r",
+							"    pm.expect(jsonData.accessToken).to.have.length.above(0);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"// Retrieve the API status variable\r",
+							"const statusApi = pm.environment.get(\"status\");\r",
+							"\r",
+							"if (statusApi === \"down\") {\r",
+							"    console.warn(\"Skipping test execution because API is down.\");\r",
+							"    pm.execution.setNextRequest(null); // Stops the collection run\r",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"clientName\": \"{{$randomFirstName}}\",\r\n   \"clientEmail\": \"{{$randomEmail}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{main_url}}/api-clients/",
+					"host": [
+						"{{main_url}}"
+					],
+					"path": [
+						"api-clients",
+						""
+					],
+					"query": [
+						{
+							"key": "limit",
+							"value": "4",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "OrderSubmit",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Store 'orderId' in collection variables if present in response\r",
+							"const jsonData = pm.response.json();\r",
+							"pm.collectionVariables.set(\"orderId\", jsonData.orderId);\r",
+							"\r",
+							"try {\r",
+							"    const jsonData = pm.response.json();\r",
+							"    if (jsonData.orderId) {\r",
+							"        pm.collectionVariables.set(\"orderId\", jsonData.orderId);\r",
+							"    } else {\r",
+							"        console.warn(\"Brak orderId w odpowiedzi.\");\r",
+							"    }\r",
+							"} catch (error) {\r",
+							"    console.error(\"Błąd parsowania odpowiedzi JSON:\", error);\r",
+							"}\r",
+							"\r",
+							"// Test to verify that the response status code is 201\r",
+							"pm.test(\"Status code is 201\", function () {\r",
+							"    pm.response.to.have.status(201);\r",
+							"});\r",
+							"\r",
+							"// Test to ensure the response time is within acceptable limits (less than 1000ms)\r",
+							"pm.test(\"Response time is less than 1000ms\", function () {\r",
+							"    pm.expect(pm.response.responseTime).to.be.below(1000);\r",
+							"});\r",
+							"\r",
+							"// Test to confirm that the response type is an object\r",
+							"pm.test(\"Response type is an object\", function () {\r",
+							"    pm.expect(pm.response.json()).to.be.a(\"object\");\r",
+							"});\r",
+							"\r",
+							"// Test to check that 'OrderId' field is a non-empty string\r",
+							"pm.test(\"OrderId is a non-empty string\", function () {\r",
+							"    let jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.orderId).to.be.a(\"string\");\r",
+							"    pm.expect(jsonData.orderId).to.have.length.above(0);\r",
+							"});\r",
+							"\r",
+							"// Test to verify that 'Created' field is of boolean type\r",
+							"pm.test(\"Created field is boolean\", function () {\r",
+							"    let jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.created).to.be.a(\"boolean\");\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"// Retrieve the API status variable\r",
+							"const statusApi = pm.environment.get(\"status\");\r",
+							"\r",
+							"if (statusApi === \"down\") {\r",
+							"    console.warn(\"Skipping test execution because API is down.\");\r",
+							"    pm.execution.setNextRequest(null); // Stops the collection run\r",
+							"}\r",
+							"\r",
+							"// Retrieve the bookId variable\r",
+							"const bookId = pm.environment.get(\"bookId\");\r",
+							"\r",
+							"if (bookId < 1 || bookId > 6) {\r",
+							"    console.warn(\"Skipping test execution because no books are available.\");\r",
+							"    pm.execution.setNextRequest(null); // Stops the collection run\r",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": {
+						"token": "{{accessToken}}"
+					}
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "\r\n{\r\n  \"bookId\": {{bookId}},\r\n  \"customerName\": \"{{customerName}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{main_url}}/orders/",
+					"host": [
+						"{{main_url}}"
+					],
+					"path": [
+						"orders",
+						""
+					],
+					"query": [
+						{
+							"key": "limit",
+							"value": "4",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "OrdersAll",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Test to verify that the response status code is 200 (OK)\r",
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"// Test to ensure the response time is within acceptable limits (less than 1000ms)\r",
+							"pm.test(\"Response time is less than 1000ms\", function () {\r",
+							"    pm.expect(pm.response.responseTime).to.be.below(1000);\r",
+							"});\r",
+							"\r",
+							"// Test to confirm that the response type is an array\r",
+							"pm.test(\"Response type is an array\", function () {\r",
+							"    pm.expect(pm.response.json()).to.be.a(\"array\");\r",
+							"});\r",
+							"\r",
+							"// Test to verify that returned array's length is greater than 0\r",
+							"pm.test(\"Response array length is greater than 0\", function () {\r",
+							"    pm.expect(pm.response.json()).to.have.length.above(0);\r",
+							"});\r",
+							"\r",
+							"// Test to validate the response JSON schema\r",
+							"pm.test(\"Response matches the expected JSON schema\", function () {\r",
+							"    let schema = {\r",
+							"        \"required\": [\"id\", \"bookId\", \"customerName\", \"createdBy\", \"quantity\", \"timestamp\"],\r",
+							"        \"properties\": {\r",
+							"            \"id\": {\"type\": \"string\"},\r",
+							"            \"bookId\": {\"type\": \"number\"},\r",
+							"            \"customerName\": {\"type\": \"string\"},\r",
+							"            \"createdBy\": {\"type\": \"string\"},\r",
+							"            \"quantity\": {\"type\": \"number\"},\r",
+							"            \"timestamp\": {\"type\": \"number\"}\r",
+							"        }\r",
+							"    };\r",
+							"\r",
+							"    pm.response.to.have.jsonSchema(schema);\r",
+							"});\r",
+							"\r",
+							"const res = pm.response;\r",
+							"console.log(typeof res);\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"// Retrieve the API status variable\r",
+							"const statusApi = pm.environment.get(\"status\");\r",
+							"\r",
+							"if (statusApi === \"down\") {\r",
+							"    console.warn(\"Skipping test execution because API is down.\");\r",
+							"    pm.execution.setNextRequest(null); // Stops the collection run\r",
+							"}\r",
+							"\r",
+							"// Retrieve the bookId variable\r",
+							"let bookId = pm.environment.get(\"bookId\");\r",
+							"\r",
+							"if (bookId < 1 || bookId > 6) {\r",
+							"    console.warn(\"Skipping test execution because no books are available.\");\r",
+							"    pm.execution.setNextRequest(null); // Stops the collection run\r",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": {
+						"token": "{{accessToken}}"
+					}
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{main_url}}/orders",
+					"host": [
+						"{{main_url}}"
+					],
+					"path": [
+						"orders"
+					],
+					"query": [
+						{
+							"key": "limit",
+							"value": "4",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "OrderSingle",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Test to verify that the response status code is 200 (OK)\r",
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"// Test to ensure the response time is within acceptable limits (less than 1000ms)\r",
+							"pm.test(\"Response time is less than 1000ms\", function () {\r",
+							"    pm.expect(pm.response.responseTime).to.be.below(1000);\r",
+							"});\r",
+							"\r",
+							"// Test to confirm that the response type is an object\r",
+							"pm.test(\"Response type is an object\", function () {\r",
+							"    pm.expect(pm.response.json()).to.be.a(\"object\");\r",
+							"});\r",
+							"\r",
+							"// Test to validate the response JSON schema\r",
+							"pm.test(\"Response matches the expected JSON schema\", function () {\r",
+							"    let schema = {\r",
+							"        \"type\": \"object\",\r",
+							"        \"required\": [\"id\", \"bookId\", \"customerName\", \"createdBy\", \"quantity\", \"timestamp\"],\r",
+							"        \"properties\": {\r",
+							"            \"id\": {\"type\": \"string\"},\r",
+							"            \"bookId\": {\"type\": \"number\"},\r",
+							"            \"customerName\": {\"type\": \"string\"},\r",
+							"            \"createdBy\": {\"type\": \"string\"},\r",
+							"            \"quantity\": {\"type\": \"number\"},\r",
+							"            \"timestamp\": {\"type\": \"number\"}\r",
+							"        }\r",
+							"    };\r",
+							"\r",
+							"    pm.response.to.have.jsonSchema(schema);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"// Retrieve the API status variable\r",
+							"const statusApi = pm.environment.get(\"status\");\r",
+							"\r",
+							"if (statusApi === \"down\") {\r",
+							"    console.warn(\"Skipping test execution because API is down.\");\r",
+							"    pm.execution.setNextRequest(null); // Stops the collection run\r",
+							"}\r",
+							"\r",
+							"// Retrieve the bookId variable\r",
+							"let bookId = pm.environment.get(\"bookId\");\r",
+							"\r",
+							"if (bookId < 1 || bookId > 6) {\r",
+							"    console.warn(\"Skipping test execution because no books are available.\");\r",
+							"    pm.execution.setNextRequest(null); // Stops the collection run\r",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": {
+						"token": "{{accessToken}}"
+					}
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{main_url}}/orders/:orderId",
+					"host": [
+						"{{main_url}}"
+					],
+					"path": [
+						"orders",
+						":orderId"
+					],
+					"query": [
+						{
+							"key": "limit",
+							"value": "4",
+							"disabled": true
+						}
+					],
+					"variable": [
+						{
+							"key": "orderId",
+							"value": "{{orderId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "OrderUpdate",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Test to verify that the response status code is 204\r",
+							"pm.test(\"Status code is 204\", function () {\r",
+							"    pm.response.to.have.status(204);\r",
+							"});\r",
+							"\r",
+							"// Test to ensure the response time is within acceptable limits (less than 1000ms)\r",
+							"pm.test(\"Response time is less than 1000ms\", function () {\r",
+							"    pm.expect(pm.response.responseTime).to.be.below(1000);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"// Retrieve the API status variable\r",
+							"const statusApi = pm.environment.get(\"status\");\r",
+							"\r",
+							"if (statusApi === \"down\") {\r",
+							"    console.warn(\"Skipping test execution because API is down.\");\r",
+							"    pm.execution.setNextRequest(null); // Stops the collection run\r",
+							"}\r",
+							"\r",
+							"// Retrieve the bookId variable\r",
+							"let bookId = pm.environment.get(\"bookId\");\r",
+							"\r",
+							"if (bookId < 1 || bookId > 6) {\r",
+							"    console.warn(\"Skipping test execution because no books are available.\");\r",
+							"    pm.execution.setNextRequest(null); // Stops the collection run\r",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": {
+						"token": "{{accessToken}}"
+					}
+				},
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"customerName\": \"{{$randomUserName}}\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{main_url}}/orders/:orderId",
+					"host": [
+						"{{main_url}}"
+					],
+					"path": [
+						"orders",
+						":orderId"
+					],
+					"query": [
+						{
+							"key": "limit",
+							"value": "4",
+							"disabled": true
+						}
+					],
+					"variable": [
+						{
+							"key": "orderId",
+							"value": "{{orderId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "OrderDelete",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Test to verify that the response status code is 204\r",
+							"pm.test(\"Status code is 204\", function () {\r",
+							"    pm.response.to.have.status(204);\r",
+							"});\r",
+							"\r",
+							"// Test to ensure the response time is within acceptable limits (less than 1000ms)\r",
+							"pm.test(\"Response time is less than 1000ms\", function () {\r",
+							"    pm.expect(pm.response.responseTime).to.be.below(1000);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"// Retrieve the API status variable\r",
+							"const statusApi = pm.environment.get(\"status\");\r",
+							"\r",
+							"if (statusApi === \"down\") {\r",
+							"    console.warn(\"Skipping test execution because API is down.\");\r",
+							"    pm.execution.setNextRequest(null); // Stops the collection run\r",
+							"}\r",
+							"\r",
+							"// Retrieve the bookId variable\r",
+							"let bookId = pm.environment.get(\"bookId\");\r",
+							"\r",
+							"if (bookId < 1 || bookId > 6) {\r",
+							"    console.warn(\"Skipping test execution because no books are available.\");\r",
+							"    pm.execution.setNextRequest(null); // Stops the collection run\r",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": {
+						"token": "{{accessToken}}"
+					}
+				},
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{main_url}}/orders/:orderId",
+					"host": [
+						"{{main_url}}"
+					],
+					"path": [
+						"orders",
+						":orderId"
+					],
+					"query": [
+						{
+							"key": "limit",
+							"value": "4",
+							"disabled": true
+						}
+					],
+					"variable": [
+						{
+							"key": "orderId",
+							"value": "{{orderId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "main_url",
+			"value": "https://simple-books-api.glitch.me",
+			"type": "string"
+		},
+		{
+			"value": "",
+			"type": "string",
+			"disabled": true
+		},
+		{
+			"key": "accessToken",
+			"value": ""
+		},
+		{
+			"key": "bookId",
+			"value": ""
+		},
+		{
+			"key": "status",
+			"value": ""
+		},
+		{
+			"key": "customerName",
+			"value": ""
+		},
+		{
+			"key": "orderId",
+			"value": ""
+		}
+	]
+}
